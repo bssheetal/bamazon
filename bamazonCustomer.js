@@ -20,7 +20,7 @@ connection.connect(function (err) {
     if (err) throw err;
     console.log("connected as id " + connection.threadId);
     start();
-
+    
 });
 
 function start() {
@@ -29,12 +29,27 @@ function start() {
             throw err
         };
         console.table(response);
+        placeorder();
     });
 }
 
-inquirer.prompt([
-    {
-        type:"input",
-        message:"",
-    },
-])
+function placeorder() {
+    inquirer.prompt([
+        {
+            type: "input",
+            message: "What's the ID of the product you would like to buy?",
+            name: "productid"
+        },
+        {
+            type: "input",
+            message: "How many would you like to buy?",
+            name: "quantity"
+        }
+    ]).then(function (response) {
+
+       
+        console.log(response.productid);
+        console.log(response.quantity);
+
+    });
+}
