@@ -20,7 +20,7 @@ connection.connect(function (err) {
     if (err) throw err;
     console.log("connected as id " + connection.threadId);
     start();
-    
+
 });
 
 function start() {
@@ -30,10 +30,16 @@ function start() {
         };
         console.table(response);
         placeorder();
+
+
     });
 }
 
+
+
 function placeorder() {
+
+
     inquirer.prompt([
         {
             type: "input",
@@ -43,13 +49,53 @@ function placeorder() {
         {
             type: "input",
             message: "How many would you like to buy?",
-            name: "quantity"
+            name: "quantitybought"
         }
-    ]).then(function (response) {
+    ]).then(function (placeorderresponse) {
+        var id = parseInt(placeorderresponse.productid);
+        var quantitybought = parseInt(placeorderresponse.quantitybought);
+        connection.query("SELECT * FROM products WHERE ?",
+            [
+                {
+                    item_id: id
+                }
+            ], function (err, data) {
+                if (err) {
+                    throw err;
+                }
+                console.table(data);
+                var q = data[0];
+                if (quantitybought > q.stock_quantity) {
+                    console.log("Insufficient quantity! product out of stock");
+                    connection.end();
+                }
+                if (quantitybought <= q.stock_quantity) {
+                    console.log("Product is in stock");
+                    connection.query("UPDATE products SET ? WHERE ?",
+                        [{
+                            stock_quantity: q.stock_quantity - quantitybought,
 
-       
-        console.log(response.productid);
-        console.log(response.quantity);
+                        },
+                        {
+                            item_id: id
+                        }
+                        ],
 
+                        function (err, res) {
+
+                            if (err) {
+                                throw err;
+                            }
+
+                            console.log("Product has been purchased and your price is" + " " + q.price * quantitybought + "$");
+                            connection.end();
+
+                        }
+                    )
+
+                }
+            })
     });
 }
+
+
