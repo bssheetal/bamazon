@@ -121,6 +121,7 @@ function addinventory() {
                         }
 
                         console.log("Product has been added");
+                        viewproducts();
                         connection.end();
 
                     }
@@ -176,6 +177,7 @@ function addnewproduct() {
                 }
 
                 console.log("New Product has been added");
+                viewproducts();
                 connection.end();
 
             }
@@ -188,5 +190,13 @@ function addnewproduct() {
 }
 
 function viewproducts() {
+    connection.query("select * from products", function (err, res) {
+        if (err) {
+            throw err;
+        }
+
+        console.table(res);
+       // connection.end();
+    });
 
 }
