@@ -16,6 +16,7 @@ var connection = mysql.createConnection({
     database: "bamazon_db"
 });
 
+//connect to database
 connection.connect(function (err) {
     if (err) throw err;
     console.log("connected as id " + connection.threadId);
@@ -23,6 +24,7 @@ connection.connect(function (err) {
 
 });
 
+//after connecting to DB run the query to view products
 function start() {
     connection.query("SELECT * FROM products", function (err, response) {
         if (err) {
@@ -36,7 +38,7 @@ function start() {
 }
 
 
-
+//place the order 
 function placeorder() {
 
 
@@ -48,13 +50,30 @@ function placeorder() {
         },
         {
             type: "input",
-            message: "How many would you like to buy?",
+            message: "How many would you like to buy?(Quit with q)",
             name: "quantitybought"
         }
     ]).then(function (placeorderresponse) {
-        var id = parseInt(placeorderresponse.productid);
-        var quantitybought = parseInt(placeorderresponse.quantitybought);
-        product(id, quantitybought);
+
+
+        if (placeorderresponse.quantitybought === "q") {
+            console.log("Thanks for shopping with us!See you soon!")
+            connection.end();
+        }
+
+        else if (!isNaN(placeorderresponse.productid || placeorderresponse.quantitybought)) {
+            var id = parseInt(placeorderresponse.productid);
+            var quantitybought = parseInt(placeorderresponse.quantitybought);
+            product(id, quantitybought);
+        }
+        else if (isNaN(placeorderresponse.productid)) {
+            console.log("Invalid no");
+            connection.end();
+        }
+
+
+
+
     });
 }
 
@@ -69,17 +88,20 @@ function product(id, quantitybought) {
             if (err) {
                 throw err;
             }
-            console.table(data);
+
             var q = data[0];
             if (quantitybought > q.stock_quantity) {
-                console.log("Insufficient quantity! product out of stock");
-                connection.end();
+                console.log("Insufficient quantity! product out of stock.You can order something else");
+                placeorder();
             }
             if (quantitybought <= q.stock_quantity) {
                 console.log("Product is in stock");
 
                 buyProduct(q, id, quantitybought);
+
             }
+
+
         })
 };
 
@@ -101,8 +123,9 @@ function buyProduct(q, id, quantitybought) {
             }
 
             console.log("Product has been purchased and your price is" + " " + q.price * quantitybought + "$");
-            connection.end();
+            placeorder();
 
         }
     )
 };
+
