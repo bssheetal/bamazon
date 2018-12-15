@@ -55,6 +55,7 @@ function afterConnection() {
 }
 
 function viewproductsforsale() {
+    console.log("SALE!SALE!SALE Christmas is here");
     connection.query("select * from products", function (err, res) {
         if (err) {
             throw err;
@@ -66,6 +67,7 @@ function viewproductsforsale() {
 }
 
 function viewlowinventory() {
+    console.log("These are the items where stock is limited or not available");
     connection.query("select * from products where stock_quantity < 5", function (err, res) {
         if (err) {
             throw err;
@@ -82,7 +84,7 @@ function addinventory() {
 
         {
             type: "input",
-            message: "Which item do you want to add more",
+            message: "Which item ID do you want to add more",
             name: "itemid"
         },
         {
@@ -93,6 +95,7 @@ function addinventory() {
     ]).then(function (addorderresponse) {
         var id = parseInt(addorderresponse.itemid);
         var quantitytobeadded = parseInt(addorderresponse.itemquantity);
+        
         connection.query("SELECT * FROM products WHERE ?",
             [
                 {
