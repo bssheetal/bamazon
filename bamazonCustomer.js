@@ -54,48 +54,55 @@ function placeorder() {
     ]).then(function (placeorderresponse) {
         var id = parseInt(placeorderresponse.productid);
         var quantitybought = parseInt(placeorderresponse.quantitybought);
-        connection.query("SELECT * FROM products WHERE ?",
-            [
-                {
-                    item_id: id
-                }
-            ], function (err, data) {
-                if (err) {
-                    throw err;
-                }
-                console.table(data);
-                var q = data[0];
-                if (quantitybought > q.stock_quantity) {
-                    console.log("Insufficient quantity! product out of stock");
-                    connection.end();
-                }
-                if (quantitybought <= q.stock_quantity) {
-                    console.log("Product is in stock");
-                    connection.query("UPDATE products SET ? WHERE ?",
-                        [{
-                            stock_quantity: q.stock_quantity - quantitybought,
-
-                        },
-                        {
-                            item_id: id
-                        }
-                        ],
-
-                        function (err, res) {
-
-                            if (err) {
-                                throw err;
-                            }
-
-                            console.log("Product has been purchased and your price is" + " " + q.price * quantitybought + "$");
-                            connection.end();
-
-                        }
-                    )
-
-                }
-            })
+        product(id, quantitybought);
     });
 }
 
 
+function product(id, quantitybought) {
+    connection.query("SELECT * FROM products WHERE ?",
+        [
+            {
+                item_id: id
+            }
+        ], function (err, data) {
+            if (err) {
+                throw err;
+            }
+            console.table(data);
+            var q = data[0];
+            if (quantitybought > q.stock_quantity) {
+                console.log("Insufficient quantity! product out of stock");
+                connection.end();
+            }
+            if (quantitybought <= q.stock_quantity) {
+                console.log("Product is in stock");
+
+                buyProduct(q, id, quantitybought);
+            }
+        })
+};
+
+function buyProduct(q, id, quantitybought) {
+    connection.query("UPDATE products SET ? WHERE ?",
+        [{
+            stock_quantity: q.stock_quantity - quantitybought,
+
+        },
+        {
+            item_id: id
+        }
+        ],
+
+        function (err, res) {
+
+            if (err) {
+                throw err;
+            }
+
+            console.log("Product has been purchased and your price is" + " " + q.price * quantitybought + "$");
+            connection.end();
+
+        }
+    )
+};
